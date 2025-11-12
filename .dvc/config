@@ -1,4 +1,4 @@
 [core]
     remote = my_remote
 ['remote "my_remote"']
-    url = https://remote.dvc.org/shruthichembu-aml-project-g13
+    url = /path/to/local_dvc_store
