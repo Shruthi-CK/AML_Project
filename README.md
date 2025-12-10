@@ -1,0 +1,130 @@
+# Forecasting Agro-Food CO₂ Emissions Under Policy Scenarios
+
+### Advanced Machine Learning Course Project 
+#### Abby Peck, Abhiroop Kumar, Grace Lin, Shruthi Chembu, Vyshnavi Maringanti
+
+---
+
+## Reading Order
+
+This repository contains the full workflow for cleaning data, defining policy scenarios, forecasting future agricultural drivers, and modeling long-horizon CO₂ emissions.  
+Files should be read or executed in the order listed below.
+
+| Step | File | Purpose |
+|------|------|----------|
+| 1 | `Data Preprocessing.ipynb` | Clean raw data, impute missing values, engineer features, and generate the cleaned dataset. |
+| 2 | `Baseline_Models.ipynb` | Train baseline models (Ridge, Lasso, RF, XGBoost) and establish benchmark performance. |
+| 3 | `Scenario Engineering.ipynb` | Define policy buckets, set multipliers, and build scenario logic based on climate literature. |
+| 4 | `Forecasting and Scenarios.ipynb` | Forecast future drivers (2021–2100) and apply policy multipliers to create scenario-adjusted inputs. |
+| 5 | `LSTM.ipynb` | Build and evaluate the LSTM sequential model (optional comparison). |
+| 6 | `TFT_train.ipynb` | Train the Temporal Fusion Transformer using historical data. |
+| 7 | `TFT_Pred.ipynb` | Generate long-horizon forecasts (baseline and policy scenarios) using the trained TFT. |
+
+
+
+
+---
+
+## 1. Data Preprocessing
+**File:** `Data Preprocessing.ipynb`  
+**Purpose:**  
+- Load raw dataset (`Agrofood_co2_emission.csv`)  
+- Handle missing values using multi-step imputation  
+- Perform feature engineering (log transforms, scaling, encoding)  
+- Output cleaned dataset (`Agrofood_co2_emission_clean.csv`)  
+
+This notebook prepares the dataset for all downstream modeling and must be run first.
+
+---
+
+## 2. Baseline Modeling
+**File:** `Baseline_Models.ipynb`  
+**Contents:**  
+- Implements Ridge, Lasso, Random Forest, and XGBoost  
+- Conducts hyperparameter tuning  
+- Uses year-based train/test split (1990–2014 train, 2015–2020 test)  
+- Produces baseline model performance comparisons and feature importance  
+
+This establishes benchmark performance before scenario design or sequence models.
+
+---
+
+## 3. Scenario Engineering (Policy Design)
+**File:** `Scenario Engineering.ipynb`  
+**Purpose:**  
+- Defines all *policy logic* used later in forecasting  
+- Groups features into three policy buckets (land-use, agriculture/livestock, supply-chain)  
+- Determines reduction multipliers for:  
+  - Baseline scenario (business-as-usual)  
+  - Moderate mitigation scenario (Scenario A)  
+  - Heavy mitigation scenario (Scenario B)  
+- Explains rationale for multiplier ranges using climate literature (IPCC, FAO, SSP)  
+- Produces functions and scaling logic that will later be applied to future forecasts  
+
+This notebook focuses on **how policy scenarios are constructed** and should be read before forecasting, because forecasting applies the multipliers defined here.
+
+---
+
+## 4. Forecasting Future Features (2021–2100)
+**File:** `Forecasting and Scenarios.ipynb`  
+**Purpose:**  
+- Forecasts all agricultural drivers to year 2100  
+  - Smooth variables → damped exponential smoothing  
+  - Noisy variables → ARIMA(1,1,1)  
+- Applies the scenario multipliers defined in `Scenario Engineering.ipynb`  
+- Outputs scenario-adjusted datasets for Baseline, Scenario A, and Scenario B  
+
+This notebook operationalizes the policy logic created earlier and generates the full future time-series inputs used for ML forecasting.
+
+---
+
+## 5. Sequential Deep Learning Models
+
+### A. LSTM
+**File:** `LSTM.ipynb`  
+**Contents:**  
+- Prepares short temporal sequences per country  
+- Builds and trains an LSTM model  
+- Predicts future emissions under all scenarios  
+- Used primarily for comparison; limited by short temporal depth  
+
+### B. Temporal Fusion Transformer (TFT)
+**Files:**  
+- `TFT_train.ipynb` (training)  
+- `TFT_Pred.ipynb` (prediction)  
+
+**Purpose:**  
+- Defines and trains the TFT model using static, known-future, and observed features  
+- Logs experiments using MLflow  
+- Loads the trained model to generate long-horizon forecasts for:  
+  - Baseline  
+  - Moderate mitigation  
+  - Heavy mitigation  
+
+These two notebooks contain the project's most advanced model and produce the final scenario-based forecasts used in the report.
+
+---
+
+## 6. Results
+Results are embedded directly in the modeling notebooks listed above.  
+They include:  
+- Baseline vs scenario emission trajectories  
+- Country-level forecast plots  
+- Model comparison tables  
+- Effects of policy strength on long-term emissions  
+
+---
+
+## 7. Presentation Materials
+**Folder:** `Presentation Details/`  
+Contains:  
+- Final slides  
+- Images and exported figures used in the class presentation  
+- Materials referenced in the written report
+
+---
+
+## 8. Data Files
+- `Agrofood_co2_emission.csv`: Raw Kaggle dataset  
+- `Agrofood_co2_emission_clean.csv`: Cleaned dataset created in preprocessing  
+- All scenario-adjusted and forecast files are generated by the notebooks and tracked via DVC  
